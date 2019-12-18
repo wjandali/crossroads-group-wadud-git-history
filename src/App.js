@@ -129,8 +129,9 @@ class App extends Component {
       <div style={{height: '100%', width: '100%', overflow: 'auto'}}>
         <Container fluid={true}>
           <InfiniteScroll
+            useWindow={true}
             loadMore={this.fetchCommits.bind(this)}
-            hasMore={!this.state.fetching && this.state.requestsMade < MAX_REQUESTS && this.state.commits.length < this.state.total}
+            hasMore={this.state.requestsMade < MAX_REQUESTS && this.state.commits.length < this.state.total}
             loader={<div className="loader" key={0}>Loading ...</div>}
           >
             { this.state.commits.map((commit) => this.renderCommit(commit)) }
