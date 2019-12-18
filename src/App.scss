@@ -1,17 +1,24 @@
+$body-bg: #FFF;
+$brand-primary: #29537d;
+$brand-bg-secondary: #d3d8de;
+
+
+@import '~bootstrap/scss/bootstrap.scss';
+
 .container-fluid, #root, .container-fluid > div {
   padding: 0;
   height: 100%;
+  background-color: $body-bg;
 }
 
-.App {
-  text-align: center;
+
+.commitContainer {
+  margin: 10px 5px;
+  padding: 10px 5px;
+  background-color: $brand-bg-secondary;
+  border-radius: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .header {
   background-color: #282c34;

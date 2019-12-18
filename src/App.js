@@ -1,18 +1,17 @@
 import React, { Component } from 'react';
 import {
-  Button,
+  Col,
   Container,
   Navbar,
   Row
 } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 import moment from 'moment';
 
 import InfiniteScroll from 'react-infinite-scroller';
 import GitHub from 'github-api';
 
-import './App.css';
+import './App.scss';
 
 const TIME_WINDOW = 3;
 const MAX_REQUESTS = 30;
@@ -89,25 +88,38 @@ class App extends Component {
     const { sha, commit: { author: { name, email, date }, message } } = commit;
 
     return (
-      <div key={sha} className="commitContainer">
-        <div className="commit">
-          { sha }
-        </div>
-        <div className="author">
-          <div className="name">
-            { name }
-          </div>
-          <div className="email">
-            { email }
-          </div>
-          <div className="date">
-            { date }
-          </div>
-        </div>
-        <div className="message">
-          { message }
-        </div>
-      </div>
+      <Row key={sha} className="commitContainer border text-primary">
+        <Col xs={12} className="fieldsWrapper font-weight-bold">
+          <Row className="shaContainer">
+            <Col xs={12} className="sha">
+              <p className="font-weight-bold">
+                Commit: { sha }
+              </p>
+            </Col>
+          </Row>
+          <Row className="authorContainer">
+            <Col xs={12} className="author">
+              <p>
+                Author: { name }, { email }
+              </p>
+            </Col>
+          </Row>
+          <Row className="messageContainer">
+            <Col xs={12} className="message">
+              <p>
+                Message: { message }
+              </p>
+            </Col>
+          </Row>
+          <Row className="dateContainer">
+            <Col className="date">
+              <p>
+                Submitted: { date }
+              </p>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
     );
 
   }
