@@ -86,11 +86,27 @@ class App extends Component {
   }
 
   renderCommit(commit) {
-    const { sha, commit: { author, message } } = commit;
+    const { sha, commit: { author: { name, email, date }, message } } = commit;
 
     return (
-      <div key={sha}>
-        {sha}
+      <div key={sha} className="commitContainer">
+        <div className="commit">
+          { sha }
+        </div>
+        <div className="author">
+          <div className="name">
+            { name }
+          </div>
+          <div className="email">
+            { email }
+          </div>
+          <div className="date">
+            { date }
+          </div>
+        </div>
+        <div className="message">
+          { message }
+        </div>
       </div>
     );
 
@@ -98,7 +114,7 @@ class App extends Component {
   
   render() {
     return (
-      <div style={{height: '700px', overflow: 'auto'}}>
+      <div style={{height: '100%', width: '100%', overflow: 'auto'}}>
         <Container fluid={true}>
           <InfiniteScroll
             loadMore={this.fetchCommits.bind(this)}
