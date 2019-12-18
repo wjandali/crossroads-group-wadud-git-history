@@ -14,7 +14,8 @@ import GitHub from 'github-api';
 
 import './App.css';
 
-const TIME_WINDOW = 2;
+const TIME_WINDOW = 3;
+const MAX_REQUESTS = 30;
 
 class App extends Component {
 
@@ -36,6 +37,7 @@ class App extends Component {
     });
 
     this.state = {
+      fetching: false,
       requestsMade,
       since,
       until,
@@ -57,25 +59,30 @@ class App extends Component {
   }
 
   fetchCommits(count) {
-    let { since, until } = this.state; 
 
     // replace until with the previous timestamp so that we fetch the next batch a time slice back
-    until = moment(since);
-    since.subtract(TIME_WINDOW, 'hours');
+    let { requestsMade, fetching, since, until } = this.state;
 
-    const requestsMade = this.state.requestsMade + 1;
+    if (requestsMade >= MAX_REQUESTS || fetching) return;
 
-    this.state.repository.listCommits({since, until}).then((response) => {
-      this.setState(
-        {
-          ...this.state,
-          requestsMade,
-          commits: this.state.commits.concat(response.data),
-          until,
-          since
-        }
-      );
-    });
+    this.setState({
+        ...this.state,
+        fetching: true,
+        requestsMade: requestsMade + 1,
+    }, () => {
+        this.state.repository.listCommits({since, until}).then((response) => {
+          this.setState(
+            {
+              ...this.state,
+              fetching: false,
+              commits: this.state.commits.concat(response.data),
+              until: moment(since),
+              since: moment(since).subtract(TIME_WINDOW, 'hours')
+            }
+          );
+        });
+      }
+    );
   }
 
   renderCommit(commit) {
@@ -95,7 +102,7 @@ class App extends Component {
         <Container fluid={true}>
           <InfiniteScroll
             loadMore={this.fetchCommits.bind(this)}
-            hasMore={this.state.requestsMade < 5 || !this.state.total || this.state.commits.length >= this.state.total}
+            hasMore={!this.state.fetching && this.state.requestsMade < MAX_REQUESTS && this.state.commits.length < this.state.total}
             loader={<div className="loader" key={0}>Loading ...</div>}
           >
             { this.state.commits.map((commit) => this.renderCommit(commit)) }
