@@ -13,20 +13,20 @@ import GitHub from 'github-api';
 
 import './App.scss';
 
-const TIME_WINDOW = 3;
+const TIME_WINDOW = 1;
 const MAX_REQUESTS = 30;
 
 class App extends Component {
 
   constructor() {
-    super()
+    super();
 
     // use the current time as a reference
     const now = moment();
 
-    // for infinite function with the Github API (which has until/since options)
+    // this is for infinite scroll function with the Github API (which has until/since options)
     // this is strictly because I wanted to tack on infinite scroll and multiple requests
-    // otherwise I'd just fetch and display in one go
+    // otherwise I'd just fetch and display in one go/bulk req
     const since = moment(now).subtract(TIME_WINDOW, 'hours');
     const until = moment(now);
     const requestsMade = 0;
@@ -43,33 +43,31 @@ class App extends Component {
       commits: [],
       total: null,
       repository: gh.getRepo('wjandali', 'crossroads-group-wadud-git-history')
-    }
+    };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.fetchTotal();
-    this.fetchCommits();
   }
 
   fetchTotal() {
     this.state.repository.listCommits().then((response) => {
-      this.setState({...this.state, total: response.data.length});
+      this.setState({ ...this.state, total: response.data.length });
     });
   }
 
-  fetchCommits(count) {
-
-    // replace until with the previous timestamp so that we fetch the next batch a time slice back
+  fetchCommits() {
+    // replace 'until' with the previous timestamp so that we fetch the next batch a time slice back
     let { requestsMade, fetching, since, until } = this.state;
 
-    if (requestsMade >= MAX_REQUESTS || fetching) return;
+    if (fetching) return;
 
     this.setState({
         ...this.state,
         fetching: true,
         requestsMade: requestsMade + 1,
     }, () => {
-        this.state.repository.listCommits({since, until}).then((response) => {
+        this.state.repository.listCommits({ since, until }).then((response) => {
           this.setState(
             {
               ...this.state,
@@ -88,24 +86,24 @@ class App extends Component {
     const { sha, commit: { author: { name, email, date }, message } } = commit;
 
     return (
-      <Row key={sha} className="commitContainer border text-primary">
-        <Col xs={12} className="fieldsWrapper font-weight-bold">
+      <Row key={ sha } className="commitContainer border text-primary">
+        <Col xs={ 12 } className="fieldsWrapper font-weight-bold">
           <Row className="shaContainer">
-            <Col xs={12} className="sha">
+            <Col xs={ 12 } className="sha">
               <p className="font-weight-bold">
                 Commit: { sha }
               </p>
             </Col>
           </Row>
           <Row className="authorContainer">
-            <Col xs={12} className="author">
+            <Col xs={ 12 } className="author">
               <p>
                 Author: { name }, { email }
               </p>
             </Col>
           </Row>
           <Row className="messageContainer">
-            <Col xs={12} className="message">
+            <Col xs={ 12 } className="message">
               <p>
                 Message: { message }
               </p>
@@ -125,14 +123,22 @@ class App extends Component {
   }
   
   render() {
+    const { __fullname: repo, __auth: { username: author } } = this.state.repository;
+
     return (
-      <div style={{height: '100%', width: '100%', overflow: 'auto'}}>
-        <Container fluid={true}>
+      <div>
+        <Container fluid={ true }>
+          <Navbar className="text-primary" sticky="top">
+            <Navbar.Brand>
+              <strong>{ repo }</strong>
+              { ' ' }
+              <span>by { author }</span>
+            </Navbar.Brand>
+          </Navbar>
           <InfiniteScroll
-            useWindow={true}
-            loadMore={this.fetchCommits.bind(this)}
-            hasMore={this.state.requestsMade < MAX_REQUESTS && this.state.commits.length < this.state.total}
-            loader={<div className="loader" key={0}>Loading ...</div>}
+            loadMore={ this.fetchCommits.bind(this) }
+            hasMore={ this.state.requestsMade < MAX_REQUESTS && this.state.commits.length < this.state.total }
+            loader={ <div className="loader" key={0}>Loading ...</div> }
           >
             { this.state.commits.map((commit) => this.renderCommit(commit)) }
           </InfiniteScroll>
